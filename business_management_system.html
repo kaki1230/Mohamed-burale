@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BizCore — Business Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-canvas: #0f1117;
+    --bg-surface: #171b26;
+    --bg-elevated: #1e2334;
+    --bg-hover: #252b3d;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.14);
+    --text-primary: #e8eaf0;
+    --text-secondary: #8b8fa8;
+    --text-muted: #555970;
+    --accent: #6366f1;
+    --accent-hover: #7c7ff5;
+    --accent-dim: rgba(99,102,241,0.15);
+    --success: #22c55e;
+    --success-dim: rgba(34,197,94,0.12);
+    --warning: #f59e0b;
+    --warning-dim: rgba(245,158,11,0.12);
+    --danger: #ef4444;
+    --danger-dim: rgba(239,68,68,0.12);
+    --info: #3b82f6;
+    --info-dim: rgba(59,130,246,0.12);
+    --teal: #14b8a6;
+    --teal-dim: rgba(20,184,166,0.12);
+    --sidebar-w: 240px;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --font: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --transition: 0.18s ease;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg-canvas); color: var(--text-primary); font-family: var(--font); font-size: 14px; line-height: 1.6; }
+
+  /* === LAYOUT === */
+  #app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* === SIDEBAR === */
+  #sidebar {
+    width: var(--sidebar-w); flex-shrink: 0; background: var(--bg-surface);
+    border-right: 1px solid var(--border); display: flex; flex-direction: column;
+    height: 100vh; overflow-y: auto; position: relative; z-index: 10;
+    transition: transform var(--transition);
+  }
+  .sidebar-logo {
+    padding: 20px 20px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px; background: var(--accent); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 10px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+
+  .sidebar-section { padding: 12px 12px 4px; }
+  .sidebar-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; padding: 0 8px 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px;
+    cursor: pointer; color: var(--text-secondary); font-size: 13.5px; font-weight: 500;
+    transition: background var(--transition), color var(--transition); margin-bottom: 1px;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .nav-item.active { background: var(--accent-dim); color: var(--accent); }
+  .nav-item .nav-icon { font-size: 16px; width: 18px; text-align: center; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto; background: var(--danger); color: #fff; font-size: 10px;
+    font-weight: 700; padding: 1px 6px; border-radius: 20px; min-width: 18px; text-align: center;
+  }
+
+  .sidebar-footer {
+    margin-top: auto; padding: 12px; border-top: 1px solid var(--border);
+  }
+  .user-card {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px;
+    cursor: pointer; transition: background var(--transition);
+  }
+  .user-card:hover { background: var(--bg-hover); }
+  .user-avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .user-name { font-size: 13px; font-weight: 600; }
+  .user-role { font-size: 11px; color: var(--text-muted); }
+
+  /* === MAIN === */
+  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* === TOPBAR === */
+  #topbar {
+    padding: 0 24px; height: 60px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px; background: var(--bg-surface); flex-shrink: 0;
+  }
+  .hamburger { display: none; cursor: pointer; font-size: 20px; color: var(--text-secondary); }
+  .page-title { font-size: 16px; font-weight: 700; flex: 1; }
+  .topbar-actions { display: flex; align-items: center; gap: 10px; }
+  .search-box {
+    display: flex; align-items: center; gap: 8px; background: var(--bg-canvas);
+    border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px;
+    color: var(--text-secondary); font-size: 13px; min-width: 220px;
+  }
+  .search-box input { background: none; border: none; outline: none; color: var(--text-primary); width: 100%; font-size: 13px; }
+  .search-box input::placeholder { color: var(--text-muted); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+    border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer;
+    border: none; transition: background var(--transition), transform 0.1s; outline: none;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 8px; background: transparent;
+    border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-secondary); font-size: 16px; transition: background var(--transition);
+  }
+  .icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+  /* === CONTENT === */
+  #content { flex: 1; overflow-y: auto; padding: 24px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* === DASHBOARD === */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 20px; position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .stat-card.accent::before { background: var(--accent); }
+  .stat-card.success::before { background: var(--success); }
+  .stat-card.warning::before { background: var(--warning); }
+  .stat-card.danger::before { background: var(--danger); }
+  .stat-card.teal::before { background: var(--teal); }
+  .stat-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+  .stat-change { font-size: 12px; display: flex; align-items: center; gap: 4px; }
+  .stat-change.up { color: var(--success); }
+  .stat-change.down { color: var(--danger); }
+  .stat-icon { position: absolute; top: 16px; right: 16px; font-size: 32px; opacity: 0.12; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+  .card {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px;
+  }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-size: 14px; font-weight: 700; }
+  .card-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Chart bars */
+  .chart-bar-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .chart-row { display: flex; align-items: center; gap: 10px; }
+  .chart-row-label { width: 36px; font-size: 11px; color: var(--text-muted); text-align: right; flex-shrink: 0; }
+  .chart-bar-bg { flex: 1; background: var(--bg-canvas); border-radius: 4px; height: 10px; overflow: hidden; }
+  .chart-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .chart-row-val { width: 60px; font-size: 11px; color: var(--text-secondary); text-align: right; flex-shrink: 0; font-family: var(--mono); }
+
+  /* SVG mini chart */
+  .mini-chart { width: 100%; height: 120px; }
+  .mini-chart path { fill: none; }
+
+  /* === TABLE === */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: var(--bg-canvas); }
+  thead th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+  tbody tr { border-top: 1px solid var(--border); transition: background var(--transition); }
+  tbody tr:hover { background: var(--bg-hover); }
+  td { padding: 11px 14px; color: var(--text-primary); vertical-align: middle; }
+  .td-mono { font-family: var(--mono); font-size: 12px; }
+
+  /* === BADGES === */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px;
+    border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .badge-success { background: var(--success-dim); color: var(--success); }
+  .badge-warning { background: var(--warning-dim); color: var(--warning); }
+  .badge-danger { background: var(--danger-dim); color: var(--danger); }
+  .badge-info { background: var(--info-dim); color: var(--info); }
+  .badge-accent { background: var(--accent-dim); color: var(--accent); }
+  .badge-muted { background: var(--bg-elevated); color: var(--text-secondary); }
+  .badge-teal { background: var(--teal-dim); color: var(--teal); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* === FORMS === */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+  input, select, textarea {
+    background: var(--bg-canvas); border: 1px solid var(--border-strong); border-radius: 8px;
+    padding: 8px 12px; color: var(--text-primary); font-family: var(--font); font-size: 13px;
+    outline: none; transition: border-color var(--transition);
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--bg-elevated); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* === MODAL === */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity var(--transition);
+    padding: 20px;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--bg-surface); border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg); padding: 24px; width: 100%; max-width: 520px;
+    max-height: 90vh; overflow-y: auto;
+    transform: scale(0.95); transition: transform var(--transition);
+  }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; padding: 4px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* === TABS === */
+  .tabs { display: flex; gap: 4px; background: var(--bg-canvas); border-radius: 10px; padding: 4px; margin-bottom: 20px; width: fit-content; }
+  .tab { padding: 6px 16px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-muted); transition: background var(--transition), color var(--transition); }
+  .tab.active { background: var(--bg-elevated); color: var(--text-primary); }
+
+  /* === PROGRESS === */
+  .progress-bar { height: 6px; background: var(--bg-canvas); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.6s; }
+  .progress-fill.success { background: var(--success); }
+  .progress-fill.warning { background: var(--warning); }
+  .progress-fill.danger { background: var(--danger); }
+
+  /* === NOTIFICATIONS === */
+  .notif-stack { position: fixed; bottom: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+  .notif {
+    background: var(--bg-elevated); border: 1px solid var(--border-strong); border-radius: var(--radius);
+    padding: 12px 16px; min-width: 280px; max-width: 360px; display: flex; align-items: flex-start; gap: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: slideIn 0.25s ease;
+  }
+  .notif-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .notif-msg { font-size: 13px; font-weight: 500; }
+  .notif-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* === SECTION HEADER === */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
+  .section-title { font-size: 20px; font-weight: 700; }
+  .section-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .section-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* === FILTERS === */
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-select {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 10px; color: var(--text-primary); font-size: 13px; cursor: pointer;
+  }
+
+  /* === AVATAR === */
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim);
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+    font-weight: 700; color: var(--accent); flex-shrink: 0;
+  }
+
+  /* === REPORT CARDS === */
+  .report-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 12px; margin-bottom: 20px; }
+  .report-kpi { background: var(--bg-canvas); border-radius: var(--radius); padding: 14px; }
+  .report-kpi-val { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+  .report-kpi-label { font-size: 11px; color: var(--text-muted); }
+
+  /* === SPARKLINE SVG === */
+  .sparkline { display: block; }
+
+  /* === LOW STOCK === */
+  .low-stock-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .low-stock-item:last-child { border-bottom: none; }
+  .low-stock-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--warning-dim); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .low-stock-name { font-size: 13px; font-weight: 600; }
+  .low-stock-qty { font-size: 12px; color: var(--text-muted); }
+  .low-stock-stock { font-family: var(--mono); font-size: 13px; }
+
+  /* === RECENT ORDERS === */
+  .order-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .order-item:last-child { border-bottom: none; }
+
+  /* === DONUT CHART === */
+  .donut-wrap { display: flex; align-items: center; gap: 20px; }
+  .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* === TOP PRODUCTS === */
+  .product-rank { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .product-rank:last-child { border-bottom: none; }
+  .rank-num { width: 22px; height: 22px; border-radius: 50%; background: var(--bg-canvas); font-size: 10px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .rank-num.gold { background: rgba(245,158,11,0.15); color: var(--warning); }
+  .rank-num.silver { background: rgba(107,114,128,0.2); color: #9ca3af; }
+  .rank-num.bronze { background: rgba(180,130,95,0.15); color: #b47c4b; }
+
+  /* === TIMELINE === */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .timeline-item { display: flex; gap: 16px; padding-bottom: 16px; position: relative; }
+  .timeline-item:not(:last-child)::before {
+    content: ''; position: absolute; left: 17px; top: 36px; bottom: 0; width: 1px; background: var(--border);
+  }
+  .timeline-dot {
+    width: 35px; height: 35px; border-radius: 50%; background: var(--bg-elevated); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+  }
+  .timeline-body { flex: 1; }
+  .timeline-title { font-size: 13px; font-weight: 600; }
+  .timeline-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* === MOBILE RESPONSIVE === */
+  @media (max-width: 768px) {
+    #sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+    .hamburger { display: flex; }
+    .sidebar-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; display: none;
+    }
+    .sidebar-overlay.open { display: block; }
+    .search-box { display: none; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid .form-group.full { grid-column: 1; }
+    #content { padding: 16px; }
+    .stat-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .donut-wrap { flex-direction: column; }
+    .section-header { flex-direction: column; align-items: flex-start; }
+  }
+  @media (max-width: 480px) {
+    .stat-grid { grid-template-columns: 1fr; }
+  }
+
+  /* === EMPTY STATE === */
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+  .empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-state p { font-size: 14px; }
+
+  /* === SCROLLBAR === */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+  /* === TOOLTIP === */
+  [title] { position: relative; cursor: help; }
+
+  /* === PRINT === */
+  @media print {
+    #sidebar, #topbar { display: none !important; }
+    #main { margin: 0; }
+    #content { overflow: visible; padding: 0; }
+    .btn { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Sidebar -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <div class="logo-text">BizCore</div>
+        <div class="logo-sub">Management Suite</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <div class="nav-item active" onclick="navigate('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="navigate('reports')">
+        <span class="nav-icon">📈</span> Reports
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Commerce</div>
+      <div class="nav-item" onclick="navigate('sales')">
+        <span class="nav-icon">💳</span> Sales
+        <span class="nav-badge" id="new-sales-badge">3</span>
+      </div>
+      <div class="nav-item" onclick="navigate('inventory')">
+        <span class="nav-icon">📦</span> Inventory
+      </div>
+      <div class="nav-item" onclick="navigate('orders')">
+        <span class="nav-icon">🛒</span> Orders
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">People</div>
+      <div class="nav-item" onclick="navigate('customers')">
+        <span class="nav-icon">👥</span> Customers
+      </div>
+      <div class="nav-item" onclick="navigate('suppliers')">
+        <span class="nav-icon">🏭</span> Suppliers
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Finance</div>
+      <div class="nav-item" onclick="navigate('expenses')">
+        <span class="nav-icon">💰</span> Expenses
+      </div>
+      <div class="nav-item" onclick="navigate('invoices')">
+        <span class="nav-icon">🧾</span> Invoices
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">System</div>
+      <div class="nav-item" onclick="navigate('settings')">
+        <span class="nav-icon">⚙️</span> Settings
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar">AJ</div>
+        <div>
+          <div class="user-name">Alex Johnson</div>
+          <div class="user-role">Administrator</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div id="main">
+    <div id="topbar">
+      <div class="hamburger" onclick="toggleSidebar()">☰</div>
+      <div class="page-title" id="page-title">Dashboard</div>
+      <div class="topbar-actions">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" placeholder="Search anything..." id="global-search" oninput="globalSearch(this.value)">
+        </div>
+        <div class="icon-btn" onclick="showNotif('Refreshed','Data updated','')" title="Refresh">🔄</div>
+        <div class="icon-btn" title="Notifications" onclick="navigate('sales')">🔔</div>
+        <button class="btn btn-primary" id="topbar-action-btn" onclick="topbarAction()">+ New Sale</button>
+      </div>
+    </div>
+
+    <div id="content">
+
+      <!-- ===== DASHBOARD PAGE ===== -->
+      <div class="page active" id="page-dashboard">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Good morning, Alex 👋</div>
+            <div class="section-sub">Here's what's happening with your business today.</div>
+          </div>
+          <div class="section-actions">
+            <select class="filter-select" onchange="updateDashboardPeriod(this.value)">
+              <option value="today">Today</option>
+              <option value="week" selected>This week</option>
+              <option value="month">This month</option>
+              <option value="year">This year</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card accent">
+            <span class="stat-icon">💳</span>
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value" id="dash-revenue">$48,290</div>
+            <div class="stat-change up">▲ 12.4% vs last week</div>
+          </div>
+          <div class="stat-card success">
+            <span class="stat-icon">🛒</span>
+            <div class="stat-label">Orders Placed</div>
+            <div class="stat-value" id="dash-orders">284</div>
+            <div class="stat-change up">▲ 8.1% vs last week</div>
+          </div>
+          <div class="stat-card warning">
+            <span class="stat-icon">👥</span>
+            <div class="stat-label">New Customers</div>
+            <div class="stat-value" id="dash-customers">38</div>
+            <div class="stat-change down">▼ 3.2% vs last week</div>
+          </div>
+          <div class="stat-card danger">
+            <span class="stat-icon">📦</span>
+            <div class="stat-label">Low Stock Items</div>
+            <div class="stat-value" id="dash-lowstock">7</div>
+            <div class="stat-change down">▲ 2 new since yesterday</div>
+          </div>
+          <div class="stat-card teal">
+            <span class="stat-icon">📈</span>
+            <div class="stat-label">Avg Order Value</div>
+            <div class="stat-value">$170</div>
+            <div class="stat-change up">▲ 5.7% vs last week</div>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Revenue Trend</div>
+                <div class="card-sub">Daily revenue — last 14 days</div>
+              </div>
+            </div>
+            <svg class="mini-chart" viewBox="0 0 520 110" id="revenue-chart"></svg>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Sales by Category</div></div>
+            <div class="donut-wrap">
+              <svg width="90" height="90" viewBox="0 0 90 90">
+                <circle cx="45" cy="45" r="34" fill="none" stroke="var(--bg-canvas)" stroke-width="14"/>
+                <circle cx="45" cy="45" r="34" fill="none" stroke="var(--accent)" stroke-width="14" stroke-dasharray="85 128" stroke-dashoffset="0" transform="rotate(-90 45 45)"/>
+                <circle cx="45" cy="45" r="34" fill="none" stroke="var(--success)" stroke-width="14" stroke-dasharray="51 162" stroke-dashoffset="-85" transform="rotate(-90 45 45)"/>
+                <circle cx="45" cy="45" r="34" fill="none" stroke="var(--warning)" stroke-width="14" stroke-dasharray="34 179" stroke-dashoffset="-136" transform="rotate(-90 45 45)"/>
+                <circle cx="45" cy="45" r="34" fill="none" stroke="var(--teal)" stroke-width="14" stroke-dasharray="26 187" stroke-dashoffset="-170" transform="rotate(-90 45 45)"/>
+                <text x="45" y="48" text-anchor="middle" fill="var(--text-primary)" font-size="12" font-weight="700" font-family="Inter">100%</text>
+              </svg>
+              <div class="donut-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Electronics — 40%</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div> Clothing — 24%</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--warning)"></div> Home & Garden — 16%</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div> Other — 20%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⚠️ Low Stock Alerts</div>
+              <button class="btn btn-ghost btn-sm" onclick="navigate('inventory')">View all</button>
+            </div>
+            <div id="low-stock-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🏆 Top Products</div>
+              <button class="btn btn-ghost btn-sm" onclick="navigate('inventory')">View all</button>
+            </div>
+            <div id="top-products-list"></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Orders</div>
+              <button class="btn btn-ghost btn-sm" onclick="navigate('orders')">View all</button>
+            </div>
+            <div id="recent-orders-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Sales by Day of Week</div>
+            </div>
+            <div class="chart-bar-wrap" id="weekday-chart"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SALES PAGE ===== -->
+      <div class="page" id="page-sales">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Sales</div>
+            <div class="section-sub" id="sales-count-sub">Loading...</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-ghost" onclick="exportData('sales')">⬇ Export</button>
+            <button class="btn btn-primary" onclick="openModal('sale')">+ New Sale</button>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <input type="text" placeholder="Search sales..." style="width:220px;padding:6px 10px" oninput="filterTable('sales',this.value)">
+          <select class="filter-select" onchange="filterByStatus('sales',this.value)">
+            <option value="">All Status</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="refunded">Refunded</option>
+          </select>
+          <select class="filter-select" onchange="filterByDate('sales',this.value)">
+            <option value="">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table id="sales-table">
+            <thead>
+              <tr>
+                <th onclick="sortTable('sales','id')">Sale ID ↕</th>
+                <th onclick="sortTable('sales','customer')">Customer ↕</th>
+                <th onclick="sortTable('sales','items')">Items</th>
+                <th onclick="sortTable('sales','amount')">Amount ↕</th>
+                <th onclick="sortTable('sales','date')">Date ↕</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="sales-tbody"></tbody>
+          </table>
+        </div>
+        <div id="sales-pagination" class="pagination" style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end"></div>
+      </div>
+
+      <!-- ===== INVENTORY PAGE ===== -->
+      <div class="page" id="page-inventory">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Inventory</div>
+            <div class="section-sub" id="inventory-count-sub">Loading...</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-ghost" onclick="exportData('inventory')">⬇ Export</button>
+            <button class="btn btn-primary" onclick="openModal('product')">+ Add Product</button>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <input type="text" placeholder="Search products..." style="width:220px;padding:6px 10px" oninput="filterTable('inventory',this.value)">
+          <select class="filter-select" onchange="filterByCategory('inventory',this.value)">
+            <option value="">All Categories</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Home &amp; Garden">Home &amp; Garden</option>
+            <option value="Sports">Sports</option>
+            <option value="Books">Books</option>
+          </select>
+          <select class="filter-select" onchange="filterByStock(this.value)">
+            <option value="">All Stock</option>
+            <option value="low">Low Stock (&lt;10)</option>
+            <option value="out">Out of Stock</option>
+            <option value="in">In Stock</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table id="inventory-table">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th onclick="sortTable('inventory','name')">Product ↕</th>
+                <th>Category</th>
+                <th onclick="sortTable('inventory','price')">Price ↕</th>
+                <th onclick="sortTable('inventory','stock')">Stock ↕</th>
+                <th>Reorder Lvl</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== ORDERS PAGE ===== -->
+      <div class="page" id="page-orders">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Orders</div>
+            <div class="section-sub">All customer orders and fulfillment status</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-ghost" onclick="exportData('orders')">⬇ Export</button>
+            <button class="btn btn-primary" onclick="openModal('order')">+ New Order</button>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <input type="text" placeholder="Search orders..." style="width:220px;padding:6px 10px" oninput="filterTable('orders',this.value)">
+          <select class="filter-select" onchange="filterByStatus('orders',this.value)">
+            <option value="">All Status</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table id="orders-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Products</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Shipping</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== CUSTOMERS PAGE ===== -->
+      <div class="page" id="page-customers">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Customers</div>
+            <div class="section-sub" id="customers-count-sub">Loading...</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-ghost" onclick="exportData('customers')">⬇ Export</button>
+            <button class="btn btn-primary" onclick="openModal('customer')">+ Add Customer</button>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <input type="text" placeholder="Search customers..." style="width:220px;padding:6px 10px" oninput="filterTable('customers',this.value)">
+          <select class="filter-select" onchange="filterByStatus('customers',this.value)">
+            <option value="">All Types</option>
+            <option value="vip">VIP</option>
+            <option value="regular">Regular</option>
+            <option value="new">New</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table id="customers-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th onclick="sortTable('customers','orders')">Orders ↕</th>
+                <th onclick="sortTable('customers','spent')">Total Spent ↕</th>
+                <th>Since</th>
+                <th>Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customers-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== SUPPLIERS PAGE ===== -->
+      <div class="page" id="page-suppliers">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Suppliers</div>
+            <div class="section-sub">Manage your vendor relationships</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="openModal('supplier')">+ Add Supplier</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="suppliers-table">
+            <thead>
+              <tr>
+                <th>Supplier</th>
+                <th>Contact</th>
+                <th>Email</th>
+                <th>Category</th>
+                <th>Lead Time</th>
+                <th>Rating</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="suppliers-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== EXPENSES PAGE ===== -->
+      <div class="page" id="page-expenses">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Expenses</div>
+            <div class="section-sub">Track and manage business expenses</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-ghost" onclick="exportData('expenses')">⬇ Export</button>
+            <button class="btn btn-primary" onclick="openModal('expense')">+ Add Expense</button>
+          </div>
+        </div>
+        <div class="report-summary">
+          <div class="report-kpi">
+            <div class="report-kpi-val" style="color:var(--danger)">$12,840</div>
+            <div class="report-kpi-label">This Month</div>
+          </div>
+          <div class="report-kpi">
+            <div class="report-kpi-val" style="color:var(--warning)">$3,210</div>
+            <div class="report-kpi-label">This Week</div>
+          </div>
+          <div class="report-kpi">
+            <div class="report-kpi-val" style="color:var(--success)">68%</div>
+            <div class="report-kpi-label">Budget Used</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Paid By</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="expenses-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== INVOICES PAGE ===== -->
+      <div class="page" id="page-invoices">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Invoices</div>
+            <div class="section-sub">Generate and track all invoices</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-ghost" onclick="printInvoice()">🖨 Print</button>
+            <button class="btn btn-primary" onclick="openModal('invoice')">+ New Invoice</button>
+          </div>
+        </div>
+        <div class="report-summary">
+          <div class="report-kpi">
+            <div class="report-kpi-val" style="color:var(--success)">$28,400</div>
+            <div class="report-kpi-label">Paid</div>
+          </div>
+          <div class="report-kpi">
+            <div class="report-kpi-val" style="color:var(--warning)">$8,200</div>
+            <div class="report-kpi-label">Pending</div>
+          </div>
+          <div class="report-kpi">
+            <div class="report-kpi-val" style="color:var(--danger)">$3,100</div>
+            <div class="report-kpi-label">Overdue</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Invoice #</th><th>Customer</th><th>Issue Date</th><th>Due Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="invoices-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== REPORTS PAGE ===== -->
+      <div class="page" id="page-reports">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Reports & Analytics</div>
+            <div class="section-sub">Business intelligence and trend analysis</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-ghost" onclick="window.print()">🖨 Print Report</button>
+            <button class="btn btn-primary" onclick="exportData('reports')">⬇ Export PDF</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" onclick="switchReportTab('weekly',this)">Weekly</div>
+          <div class="tab" onclick="switchReportTab('monthly',this)">Monthly</div>
+          <div class="tab" onclick="switchReportTab('yearly',this)">Yearly</div>
+        </div>
+
+        <div id="report-weekly">
+          <div class="report-summary">
+            <div class="report-kpi"><div class="report-kpi-val">$11,480</div><div class="report-kpi-label">Revenue</div></div>
+            <div class="report-kpi"><div class="report-kpi-val">68</div><div class="report-kpi-label">Orders</div></div>
+            <div class="report-kpi"><div class="report-kpi-val">$168</div><div class="report-kpi-label">Avg Order</div></div>
+            <div class="report-kpi"><div class="report-kpi-val">12</div><div class="report-kpi-label">New Customers</div></div>
+            <div class="report-kpi"><div class="report-kpi-val" style="color:var(--success)">▲ 12%</div><div class="report-kpi-label">Growth</div></div>
+          </div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header"><div class="card-title">Revenue — This Week (Mon–Sun)</div></div>
+            <div class="chart-bar-wrap" id="weekly-revenue-chart"></div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Top Selling Products</div></div>
+              <div id="weekly-top-products"></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Order Status Breakdown</div></div>
+              <div id="weekly-order-status"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="report-monthly" style="display:none">
+          <div class="report-summary">
+            <div class="report-kpi"><div class="report-kpi-val">$48,290</div><div class="report-kpi-label">Revenue</div></div>
+            <div class="report-kpi"><div class="report-kpi-val">284</div><div class="report-kpi-label">Orders</div></div>
+            <div class="report-kpi"><div class="report-kpi-val">$170</div><div class="report-kpi-label">Avg Order</div></div>
+            <div class="report-kpi"><div class="report-kpi-val">38</div><div class="report-kpi-label">New Customers</div></div>
+            <div class="report-kpi"><div class="report-kpi-val" style="color:var(--success)">▲ 8.3%</div><div class="report-kpi-label">Growth</div></div>
+          </div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header"><div class="card-title">Revenue — This Month (Daily)</div></div>
+            <svg class="mini-chart" viewBox="0 0 520 110" id="monthly-chart"></svg>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Monthly Category Performance</div></div>
+            <div class="chart-bar-wrap" id="monthly-category-chart"></div>
+          </div>
+        </div>
+
+        <div id="report-yearly" style="display:none">
+          <div class="report-summary">
+            <div class="report-kpi"><div class="report-kpi-val">$524,800</div><div class="report-kpi-label">Annual Revenue</div></div>
+            <div class="report-kpi"><div class="report-kpi-val">3,180</div><div class="report-kpi-label">Total Orders</div></div>
+            <div class="report-kpi"><div class="report-kpi-val">$165</div><div class="report-kpi-label">Avg Order</div></div>
+            <div class="report-kpi"><div class="report-kpi-val">412</div><div class="report-kpi-label">Customers</div></div>
+            <div class="report-kpi"><div class="report-kpi-val" style="color:var(--success)">▲ 23%</div><div class="report-kpi-label">YoY Growth</div></div>
+          </div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header"><div class="card-title">Annual Revenue — Monthly Breakdown</div></div>
+            <div class="chart-bar-wrap" id="yearly-revenue-chart"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Year-over-Year Comparison</div></div>
+            <svg class="mini-chart" viewBox="0 0 520 110" id="yoy-chart"></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SETTINGS PAGE ===== -->
+      <div class="page" id="page-settings">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Settings</div>
+            <div class="section-sub">Configure your business management system</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Business Profile</div></div>
+            <div class="form-grid">
+              <div class="form-group full"><label>Business Name</label><input type="text" value="BizCore Inc."></div>
+              <div class="form-group"><label>Email</label><input type="email" value="admin@bizcore.com"></div>
+              <div class="form-group"><label>Phone</label><input type="text" value="+1 (555) 123-4567"></div>
+              <div class="form-group full"><label>Address</label><textarea>123 Business Ave, Suite 400, New York, NY 10001</textarea></div>
+              <div class="form-group"><label>Currency</label><select><option>USD ($)</option><option>EUR (€)</option><option>GBP (£)</option></select></div>
+              <div class="form-group"><label>Tax Rate (%)</label><input type="number" value="8.5"></div>
+            </div>
+            <div style="margin-top:16px"><button class="btn btn-primary" onclick="showNotif('Saved','Business profile updated','✅')">Save Changes</button></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Notifications</div></div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--text-primary)">
+                <input type="checkbox" checked style="width:auto"> Low stock alerts
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--text-primary)">
+                <input type="checkbox" checked style="width:auto"> New order notifications
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--text-primary)">
+                <input type="checkbox" style="width:auto"> Daily sales summary email
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--text-primary)">
+                <input type="checkbox" checked style="width:auto"> Invoice due date reminders
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--text-primary)">
+                <input type="checkbox" style="width:auto"> Weekly report email
+              </label>
+            </div>
+            <div style="margin-top:16px"><button class="btn btn-primary" onclick="showNotif('Saved','Notification preferences saved','✅')">Save Preferences</button></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">User Management</div></div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+                <div style="display:flex;align-items:center;gap:10px"><div class="avatar">AJ</div><div><div style="font-size:13px;font-weight:600">Alex Johnson</div><div style="font-size:12px;color:var(--text-muted)">Administrator</div></div></div>
+                <span class="badge badge-accent">Admin</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+                <div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="background:var(--success-dim);color:var(--success)">SM</div><div><div style="font-size:13px;font-weight:600">Sarah Miller</div><div style="font-size:12px;color:var(--text-muted)">Sales Manager</div></div></div>
+                <span class="badge badge-info">Manager</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">
+                <div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="background:var(--warning-dim);color:var(--warning)">TK</div><div><div style="font-size:13px;font-weight:600">Tom Kelly</div><div style="font-size:12px;color:var(--text-muted)">Inventory Staff</div></div></div>
+                <span class="badge badge-muted">Staff</span>
+              </div>
+            </div>
+            <div style="margin-top:14px"><button class="btn btn-ghost btn-sm">+ Invite User</button></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Data & Backup</div></div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <button class="btn btn-ghost" onclick="showNotif('Backup','Database backup started...','💾')">💾 Backup Database Now</button>
+              <button class="btn btn-ghost" onclick="exportData('all')">⬇ Export All Data (CSV)</button>
+              <button class="btn btn-ghost" onclick="showNotif('Import','Ready to import','📁')">⬆ Import Data</button>
+              <div style="border-top:1px solid var(--border);padding-top:12px">
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Last backup: 2 hours ago</div>
+                <div class="progress-bar"><div class="progress-fill success" style="width:78%"></div></div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px">78% of 10GB storage used</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- === MODALS === -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Modal</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- Notifications -->
+<div class="notif-stack" id="notif-stack"></div>
+
+<script>
+// ============================================================
+// DATA STORE (simulates MySQL database)
+// ============================================================
+const DB = {
+  products: [
+    {id:1,sku:'EL-001',name:'iPhone 15 Pro Max',category:'Electronics',price:1199,cost:850,stock:24,reorder:10,supplier:'TechSource Inc'},
+    {id:2,sku:'EL-002',name:'Samsung Galaxy S24',category:'Electronics',price:999,cost:720,stock:8,reorder:15,supplier:'TechSource Inc'},
+    {id:3,sku:'EL-003',name:'MacBook Air M3',category:'Electronics',price:1299,cost:950,stock:5,reorder:8,supplier:'Apple Direct'},
+    {id:4,sku:'EL-004',name:'Sony WH-1000XM5',category:'Electronics',price:349,cost:210,stock:31,reorder:10,supplier:'TechSource Inc'},
+    {id:5,sku:'CL-001',name:'Nike Air Max 270',category:'Clothing',price:129,cost:68,stock:2,reorder:20,supplier:'Sport Goods Co'},
+    {id:6,sku:'CL-002',name:'Adidas Ultraboost 23',category:'Clothing',price:189,cost:100,stock:18,reorder:15,supplier:'Sport Goods Co'},
+    {id:7,sku:'CL-003',name:'Levi\'s 501 Jeans',category:'Clothing',price:89,cost:42,stock:45,reorder:20,supplier:'Fashion House'},
+    {id:8,sku:'HG-001',name:'Dyson V15 Vacuum',category:'Home & Garden',price:649,cost:420,stock:0,reorder:5,supplier:'Home Essentials'},
+    {id:9,sku:'HG-002',name:'Instant Pot Duo 7-in-1',category:'Home & Garden',price:99,cost:55,stock:22,reorder:10,supplier:'Home Essentials'},
+    {id:10,sku:'SP-001',name:'Peloton Bike+',category:'Sports',price:2495,cost:1800,stock:3,reorder:5,supplier:'Sport Goods Co'},
+    {id:11,sku:'SP-002',name:'Garmin Fenix 7',category:'Sports',price:699,cost:450,stock:14,reorder:8,supplier:'Sport Goods Co'},
+    {id:12,sku:'BK-001',name:'Atomic Habits',category:'Books',price:18,cost:7,stock:60,reorder:20,supplier:'Book Distributors'},
+    {id:13,sku:'EL-005',name:'iPad Pro 12.9"',category:'Electronics',price:1099,cost:780,stock:6,reorder:8,supplier:'Apple Direct'},
+    {id:14,sku:'HG-003',name:'Nespresso Vertuo Next',category:'Home & Garden',price:179,cost:95,stock:17,reorder:12,supplier:'Home Essentials'},
+  ],
+  customers: [
+    {id:1,name:'Emma Thompson',email:'emma.t@gmail.com',phone:'555-0101',orders:24,spent:3820,since:'2021-03-15',type:'vip'},
+    {id:2,name:'James Wilson',email:'j.wilson@outlook.com',phone:'555-0102',orders:12,spent:1640,since:'2022-07-22',type:'regular'},
+    {id:3,name:'Sofia Rodriguez',email:'sofia.r@email.com',phone:'555-0103',orders:7,spent:890,since:'2023-01-10',type:'regular'},
+    {id:4,name:'Daniel Kim',email:'d.kim@corp.com',phone:'555-0104',orders:38,spent:8240,since:'2020-11-05',type:'vip'},
+    {id:5,name:'Olivia Chen',email:'o.chen@gmail.com',phone:'555-0105',orders:3,spent:210,since:'2024-02-14',type:'new'},
+    {id:6,name:'Marcus Johnson',email:'m.johnson@yahoo.com',phone:'555-0106',orders:19,spent:2780,since:'2021-09-30',type:'regular'},
+    {id:7,name:'Isabella Martinez',email:'i.mart@email.com',phone:'555-0107',orders:52,spent:12400,since:'2019-06-12',type:'vip'},
+    {id:8,name:'Lucas Brown',email:'l.brown@gmail.com',phone:'555-0108',orders:1,spent:89,since:'2024-04-01',type:'new'},
+    {id:9,name:'Ava Williams',email:'ava.w@corp.com',phone:'555-0109',orders:15,spent:2100,since:'2022-03-18',type:'regular'},
+    {id:10,name:'Noah Davis',email:'noah.d@gmail.com',phone:'555-0110',orders:8,spent:960,since:'2023-05-07',type:'regular'},
+  ],
+  sales: [
+    {id:'SL-2401',customer:'Emma Thompson',items:'iPhone 15 Pro Max × 1',amount:1199,date:'2024-06-15',payment:'Credit Card',status:'completed'},
+    {id:'SL-2402',customer:'James Wilson',items:'Sony WH-1000XM5 × 2',amount:698,date:'2024-06-15',payment:'PayPal',status:'completed'},
+    {id:'SL-2403',customer:'Daniel Kim',items:'MacBook Air M3 × 1',amount:1299,date:'2024-06-14',payment:'Bank Transfer',status:'completed'},
+    {id:'SL-2404',customer:'Sofia Rodriguez',items:'Nike Air Max 270 × 1, Levi\'s 501 × 1',amount:218,date:'2024-06-14',payment:'Credit Card',status:'pending'},
+    {id:'SL-2405',customer:'Isabella Martinez',items:'Peloton Bike+ × 1',amount:2495,date:'2024-06-13',payment:'Financing',status:'completed'},
+    {id:'SL-2406',customer:'Marcus Johnson',items:'iPad Pro 12.9" × 1',amount:1099,date:'2024-06-13',payment:'Credit Card',status:'completed'},
+    {id:'SL-2407',customer:'Olivia Chen',items:'Instant Pot Duo × 1',amount:99,date:'2024-06-12',payment:'Debit Card',status:'refunded'},
+    {id:'SL-2408',customer:'Noah Davis',items:'Atomic Habits × 2',amount:36,date:'2024-06-12',payment:'Credit Card',status:'completed'},
+    {id:'SL-2409',customer:'Lucas Brown',items:'Adidas Ultraboost × 1',amount:189,date:'2024-06-11',payment:'PayPal',status:'pending'},
+    {id:'SL-2410',customer:'Ava Williams',items:'Garmin Fenix 7 × 1',amount:699,date:'2024-06-11',payment:'Credit Card',status:'completed'},
+    {id:'SL-2411',customer:'Emma Thompson',items:'Nespresso Vertuo × 1',amount:179,date:'2024-06-10',payment:'Credit Card',status:'completed'},
+    {id:'SL-2412',customer:'Daniel Kim',items:'Samsung Galaxy S24 × 2',amount:1998,date:'2024-06-10',payment:'Bank Transfer',status:'completed'},
+  ],
+  orders: [
+    {id:'ORD-8841',customer:'Emma Thompson',products:'iPhone 15 Pro Max',total:1199,date:'2024-06-15',shipping:'FedEx',status:'delivered'},
+    {id:'ORD-8842',customer:'James Wilson',products:'Sony WH-1000XM5 × 2',total:698,date:'2024-06-15',shipping:'UPS',status:'shipped'},
+    {id:'ORD-8843',customer:'Daniel Kim',products:'MacBook Air M3',total:1299,date:'2024-06-14',shipping:'FedEx',status:'processing'},
+    {id:'ORD-8844',customer:'Sofia Rodriguez',products:'Nike + Levi\'s Bundle',total:218,date:'2024-06-14',shipping:'USPS',status:'processing'},
+    {id:'ORD-8845',customer:'Isabella Martinez',products:'Peloton Bike+',total:2495,date:'2024-06-13',shipping:'White Glove',status:'shipped'},
+    {id:'ORD-8846',customer:'Marcus Johnson',products:'iPad Pro 12.9"',total:1099,date:'2024-06-13',shipping:'FedEx',status:'delivered'},
+    {id:'ORD-8847',customer:'Olivia Chen',products:'Instant Pot Duo',total:99,date:'2024-06-12',shipping:'USPS',status:'cancelled'},
+    {id:'ORD-8848',customer:'Noah Davis',products:'Atomic Habits × 2',total:36,date:'2024-06-12',shipping:'USPS',status:'delivered'},
+    {id:'ORD-8849',customer:'Lucas Brown',products:'Adidas Ultraboost',total:189,date:'2024-06-11',shipping:'UPS',status:'processing'},
+  ],
+  suppliers: [
+    {id:1,name:'TechSource Inc',contact:'Mike Chen',email:'mike@techsource.com',category:'Electronics',leadTime:'7 days',rating:5,status:'active'},
+    {id:2,name:'Sport Goods Co',contact:'Lisa Park',email:'lisa@sportgoods.com',category:'Sports & Clothing',leadTime:'5 days',rating:4,status:'active'},
+    {id:3,name:'Home Essentials',contact:'Bob Turner',email:'bob@homeess.com',category:'Home & Garden',leadTime:'10 days',rating:3,status:'active'},
+    {id:4,name:'Fashion House',contact:'Anna Russo',email:'anna@fashionhouse.com',category:'Clothing',leadTime:'14 days',rating:4,status:'inactive'},
+    {id:5,name:'Book Distributors',contact:'Chris Lee',email:'chris@bookdist.com',category:'Books',leadTime:'3 days',rating:5,status:'active'},
+    {id:6,name:'Apple Direct',contact:'Support Team',email:'orders@apple.com',category:'Electronics',leadTime:'2 days',rating:5,status:'active'},
+  ],
+  expenses: [
+    {date:'2024-06-15',desc:'Office Supplies',cat:'Operations',amount:245,paidBy:'Company Card',status:'approved'},
+    {date:'2024-06-14',desc:'Server Hosting (AWS)',cat:'Technology',amount:890,paidBy:'Bank Transfer',status:'approved'},
+    {date:'2024-06-13',desc:'Marketing Campaign',cat:'Marketing',amount:2400,paidBy:'Company Card',status:'pending'},
+    {date:'2024-06-12',desc:'Employee Training',cat:'HR',amount:750,paidBy:'Check',status:'approved'},
+    {date:'2024-06-10',desc:'FedEx Shipping Fees',cat:'Logistics',amount:380,paidBy:'Bank Transfer',status:'approved'},
+    {date:'2024-06-08',desc:'Social Media Ads',cat:'Marketing',amount:1200,paidBy:'Company Card',status:'approved'},
+    {date:'2024-06-05',desc:'Office Rent',cat:'Operations',amount:4500,paidBy:'Bank Transfer',status:'approved'},
+    {date:'2024-06-03',desc:'Software Licenses',cat:'Technology',amount:560,paidBy:'Credit Card',status:'pending'},
+  ],
+  invoices: [
+    {id:'INV-2024-001',customer:'Isabella Martinez',issued:'2024-06-01',due:'2024-06-15',amount:2495,status:'paid'},
+    {id:'INV-2024-002',customer:'Daniel Kim',issued:'2024-06-03',due:'2024-06-17',amount:3297,status:'paid'},
+    {id:'INV-2024-003',customer:'Emma Thompson',issued:'2024-06-08',due:'2024-06-22',amount:1378,status:'pending'},
+    {id:'INV-2024-004',customer:'Marcus Johnson',issued:'2024-06-10',due:'2024-06-24',amount:1099,status:'pending'},
+    {id:'INV-2024-005',customer:'Ava Williams',issued:'2024-05-20',due:'2024-06-03',amount:699,status:'overdue'},
+    {id:'INV-2024-006',customer:'James Wilson',issued:'2024-05-25',due:'2024-06-08',amount:698,status:'paid'},
+    {id:'INV-2024-007',customer:'Sofia Rodriguez',issued:'2024-06-12',due:'2024-06-26',amount:218,status:'pending'},
+    {id:'INV-2024-008',customer:'Noah Davis',issued:'2024-05-15',due:'2024-05-29',amount:36,status:'overdue'},
+  ]
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let currentPage = 'dashboard';
+let currentModal = null;
+let editId = null;
+let filters = { sales:{text:'',status:'',date:''}, inventory:{text:'',cat:'',stock:''}, customers:{text:'',type:''}, orders:{text:'',status:''} };
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.toLowerCase().includes(page.replace('-',' '))) n.classList.add('active');
+  });
+  const titles = {dashboard:'Dashboard',sales:'Sales',inventory:'Inventory',orders:'Orders',customers:'Customers',suppliers:'Suppliers',expenses:'Expenses',invoices:'Invoices',reports:'Reports & Analytics',settings:'Settings'};
+  document.getElementById('page-title').textContent = titles[page] || page;
+  const actions = {dashboard:'+ New Sale',sales:'+ New Sale',inventory:'+ Add Product',orders:'+ New Order',customers:'+ Add Customer',suppliers:'+ Add Supplier',expenses:'+ Add Expense',invoices:'+ New Invoice',reports:'⬇ Export',settings:'Save All'};
+  document.getElementById('topbar-action-btn').textContent = actions[page] || '+ New';
+  currentPage = page;
+  closeSidebar();
+  renderPage(page);
+}
+
+function topbarAction() {
+  const map = {dashboard:'sale',sales:'sale',inventory:'product',orders:'order',customers:'customer',suppliers:'supplier',expenses:'expense',invoices:'invoice'};
+  if (map[currentPage]) openModal(map[currentPage]);
+}
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+function renderPage(page) {
+  if (page === 'dashboard') renderDashboard();
+  else if (page === 'sales') renderSales();
+  else if (page === 'inventory') renderInventory();
+  else if (page === 'orders') renderOrders();
+  else if (page === 'customers') renderCustomers();
+  else if (page === 'suppliers') renderSuppliers();
+  else if (page === 'expenses') renderExpenses();
+  else if (page === 'invoices') renderInvoices();
+  else if (page === 'reports') renderReports();
+}
+
+// --- DASHBOARD ---
+function renderDashboard() {
+  // Revenue chart
+  const vals = [3200,4100,2900,5800,4800,6200,7100,5500,4900,6800,7200,5900,8100,7400];
+  drawLineChart('revenue-chart', vals, '#6366f1');
+
+  // Low stock
+  const lowStock = DB.products.filter(p => p.stock <= 8).slice(0,5);
+  document.getElementById('low-stock-list').innerHTML = lowStock.map(p => `
+    <div class="low-stock-item">
+      <div class="low-stock-icon">📦</div>
+      <div style="flex:1">
+        <div class="low-stock-name">${p.name}</div>
+        <div class="low-stock-qty">SKU: ${p.sku} · Reorder at ${p.reorder}</div>
+      </div>
+      <div class="low-stock-stock" style="color:${p.stock===0?'var(--danger)':'var(--warning)'}">${p.stock===0?'OUT':p.stock+' left'}</div>
+    </div>
+  `).join('');
+
+  // Top products
+  const tops = [{name:'iPhone 15 Pro Max',rev:'$28,776',pct:85},{name:'Peloton Bike+',rev:'$22,455',pct:67},{name:'MacBook Air M3',rev:'$19,485',pct:58},{name:'Samsung Galaxy S24',rev:'$14,985',pct:45},{name:'iPad Pro 12.9"',rev:'$10,890',pct:33}];
+  const rankClasses = ['gold','silver','bronze','',''];
+  document.getElementById('top-products-list').innerHTML = tops.map((p,i) => `
+    <div class="product-rank">
+      <div class="rank-num ${rankClasses[i]}">${i+1}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${p.name}</div><div style="margin-top:4px"><div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%;background:${i===0?'var(--warning)':i===1?'var(--text-muted)':'var(--accent)'}"></div></div></div></div>
+      <div style="font-size:13px;font-weight:700;font-family:var(--mono)">${p.rev}</div>
+    </div>
+  `).join('');
+
+  // Recent orders
+  const recent = DB.orders.slice(0,5);
+  document.getElementById('recent-orders-list').innerHTML = recent.map(o => `
+    <div class="order-item">
+      <div class="avatar">${o.customer.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${o.customer}</div><div style="font-size:12px;color:var(--text-muted)">${o.products}</div></div>
+      <div style="text-align:right"><div style="font-size:13px;font-weight:700;font-family:var(--mono)">$${o.total.toLocaleString()}</div><div style="margin-top:4px">${statusBadge(o.status)}</div></div>
+    </div>
+  `).join('');
+
+  // Weekday chart
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const dayVals = [4200,5100,3800,6400,7200,8800,4100];
+  const maxDay = Math.max(...dayVals);
+  document.getElementById('weekday-chart').innerHTML = days.map((d,i) => `
+    <div class="chart-row">
+      <div class="chart-row-label">${d}</div>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(dayVals[i]/maxDay*100).toFixed(1)}%;background:var(--accent)"></div></div>
+      <div class="chart-row-val">$${(dayVals[i]/1000).toFixed(1)}k</div>
+    </div>
+  `).join('');
+}
+
+function drawLineChart(id, vals, color, color2) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const w = 520, h = 110, pad = 16;
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const pts = vals.map((v,i) => {
+    const x = pad + (i / (vals.length-1)) * (w - pad*2);
+    const y = pad + (1 - (v - min)/(max - min)) * (h - pad*2);
+    return [x,y];
+  });
+  const areaD = `M${pts[0][0]},${h} ` + pts.map(p=>`L${p[0]},${p[1]}`).join(' ') + ` L${pts[pts.length-1][0]},${h} Z`;
+  const lineD = `M${pts[0][0]},${pts[0][1]} ` + pts.slice(1).map(p=>`L${p[0]},${p[1]}`).join(' ');
+
+  let html = `<defs><linearGradient id="grad-${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.25"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>`;
+  html += `<path d="${areaD}" fill="url(#grad-${id})"/>`;
+  html += `<path d="${lineD}" stroke="${color}" stroke-width="2.5" fill="none" stroke-linejoin="round"/>`;
+  if (color2) {
+    const vals2 = vals.map(v => v * 0.75);
+    const pts2 = vals2.map((v,i) => {
+      const x = pad + (i / (vals2.length-1)) * (w - pad*2);
+      const y = pad + (1 - (v - min)/(max - min)) * (h - pad*2);
+      return [x,y];
+    });
+    const line2D = `M${pts2[0][0]},${pts2[0][1]} ` + pts2.slice(1).map(p=>`L${p[0]},${p[1]}`).join(' ');
+    html += `<path d="${line2D}" stroke="${color2}" stroke-width="2" fill="none" stroke-dasharray="5,4" stroke-linejoin="round"/>`;
+  }
+  // dots
+  pts.forEach(p => html += `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${color}" opacity="0.7"/>`);
+  el.innerHTML = html;
+}
+
+// --- SALES ---
+function renderSales() {
+  const filtered = filterSalesData();
+  document.getElementById('sales-count-sub').textContent = `${filtered.length} transactions · $${filtered.reduce((a,s)=>a+(s.status!=='refunded'?s.amount:0),0).toLocaleString()} total`;
+  document.getElementById('sales-tbody').innerHTML = filtered.map(s => `
+    <tr>
+      <td class="td-mono" style="color:var(--accent)">${s.id}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:26px;height:26px;font-size:10px">${s.customer.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>${s.customer}</div></td>
+      <td style="color:var(--text-secondary);font-size:12px">${s.items}</td>
+      <td style="font-family:var(--mono);font-weight:700">$${s.amount.toLocaleString()}</td>
+      <td style="color:var(--text-muted)">${formatDate(s.date)}</td>
+      <td>${s.payment}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="viewSale('${s.id}')">View</button>
+          <button class="btn btn-ghost btn-sm" onclick="editRecord('sale','${s.id}')">Edit</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterSalesData() {
+  return DB.sales.filter(s => {
+    const f = filters.sales;
+    const textMatch = !f.text || s.id.toLowerCase().includes(f.text) || s.customer.toLowerCase().includes(f.text) || s.items.toLowerCase().includes(f.text);
+    const statusMatch = !f.status || s.status === f.status;
+    return textMatch && statusMatch;
+  });
+}
+
+// --- INVENTORY ---
+function renderInventory() {
+  const filtered = filterInventoryData();
+  document.getElementById('inventory-count-sub').textContent = `${filtered.length} products · ${DB.products.filter(p=>p.stock===0).length} out of stock`;
+  document.getElementById('inventory-tbody').innerHTML = filtered.map(p => `
+    <tr>
+      <td class="td-mono" style="color:var(--text-muted)">${p.sku}</td>
+      <td style="font-weight:600">${p.name}</td>
+      <td><span class="badge badge-muted">${p.category}</span></td>
+      <td style="font-family:var(--mono);font-weight:700">$${p.price.toLocaleString()}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:var(--mono);font-weight:700;color:${p.stock===0?'var(--danger)':p.stock<p.reorder?'var(--warning)':'var(--success)'}">${p.stock}</span>
+          <div style="width:60px"><div class="progress-bar"><div class="progress-fill ${p.stock===0?'danger':p.stock<p.reorder?'warning':'success'}" style="width:${Math.min(p.stock/50*100,100)}%"></div></div></div>
+        </div>
+      </td>
+      <td style="color:var(--text-muted)">${p.reorder}</td>
+      <td>${p.stock===0?'<span class="badge badge-danger">Out of Stock</span>':p.stock<p.reorder?'<span class="badge badge-warning">Low Stock</span>':'<span class="badge badge-success">In Stock</span>'}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="editRecord('product',${p.id})">Edit</button>
+          <button class="btn btn-ghost btn-sm" onclick="reorderProduct(${p.id})">Reorder</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterInventoryData() {
+  return DB.products.filter(p => {
+    const f = filters.inventory;
+    const textMatch = !f.text || p.name.toLowerCase().includes(f.text) || p.sku.toLowerCase().includes(f.text);
+    const catMatch = !f.cat || p.category === f.cat;
+    let stockMatch = true;
+    if (f.stock === 'low') stockMatch = p.stock > 0 && p.stock < p.reorder;
+    else if (f.stock === 'out') stockMatch = p.stock === 0;
+    else if (f.stock === 'in') stockMatch = p.stock >= p.reorder;
+    return textMatch && catMatch && stockMatch;
+  });
+}
+
+// --- ORDERS ---
+function renderOrders() {
+  const filtered = DB.orders.filter(o => {
+    const f = filters.orders;
+    const textMatch = !f.text || o.id.toLowerCase().includes(f.text) || o.customer.toLowerCase().includes(f.text);
+    const statusMatch = !f.status || o.status === f.status;
+    return textMatch && statusMatch;
+  });
+  document.getElementById('orders-tbody').innerHTML = filtered.map(o => `
+    <tr>
+      <td class="td-mono" style="color:var(--accent)">${o.id}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:26px;height:26px;font-size:10px">${o.customer.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>${o.customer}</div></td>
+      <td style="font-size:12px;color:var(--text-secondary)">${o.products}</td>
+      <td style="font-family:var(--mono);font-weight:700">$${o.total.toLocaleString()}</td>
+      <td style="color:var(--text-muted)">${formatDate(o.date)}</td>
+      <td style="font-size:12px">${o.shipping}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="updateOrderStatus('${o.id}')">Update</button>
+          <button class="btn btn-ghost btn-sm" onclick="viewOrderTimeline('${o.id}')">Track</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// --- CUSTOMERS ---
+function renderCustomers() {
+  const filtered = DB.customers.filter(c => {
+    const f = filters.customers;
+    const textMatch = !f.text || c.name.toLowerCase().includes(f.text) || c.email.toLowerCase().includes(f.text);
+    const typeMatch = !f.type || c.type === f.type;
+    return textMatch && typeMatch;
+  });
+  document.getElementById('customers-count-sub').textContent = `${filtered.length} customers · ${DB.customers.filter(c=>c.type==='vip').length} VIP`;
+  document.getElementById('customers-tbody').innerHTML = filtered.map(c => `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar">${c.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div><div><div style="font-weight:600">${c.name}</div></div></div></td>
+      <td style="color:var(--info)">${c.email}</td>
+      <td style="color:var(--text-muted)">${c.phone}</td>
+      <td style="font-family:var(--mono)">${c.orders}</td>
+      <td style="font-family:var(--mono);font-weight:700">$${c.spent.toLocaleString()}</td>
+      <td style="color:var(--text-muted)">${formatDate(c.since)}</td>
+      <td>${customerBadge(c.type)}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="viewCustomer(${c.id})">View</button>
+          <button class="btn btn-ghost btn-sm" onclick="editRecord('customer',${c.id})">Edit</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// --- SUPPLIERS ---
+function renderSuppliers() {
+  document.getElementById('suppliers-tbody').innerHTML = DB.suppliers.map(s => `
+    <tr>
+      <td style="font-weight:600">${s.name}</td>
+      <td>${s.contact}</td>
+      <td style="color:var(--info)">${s.email}</td>
+      <td><span class="badge badge-muted">${s.category}</span></td>
+      <td style="color:var(--text-muted)">${s.leadTime}</td>
+      <td>${'⭐'.repeat(s.rating)}</td>
+      <td>${s.status==='active'?'<span class="badge badge-success">Active</span>':'<span class="badge badge-muted">Inactive</span>'}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="editRecord('supplier',${s.id})">Edit</button>
+          <button class="btn btn-ghost btn-sm" onclick="contactSupplier(${s.id})">Contact</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// --- EXPENSES ---
+function renderExpenses() {
+  document.getElementById('expenses-tbody').innerHTML = DB.expenses.map((e,i) => `
+    <tr>
+      <td style="color:var(--text-muted)">${formatDate(e.date)}</td>
+      <td style="font-weight:600">${e.desc}</td>
+      <td><span class="badge badge-muted">${e.cat}</span></td>
+      <td style="font-family:var(--mono);font-weight:700;color:var(--danger)">$${e.amount.toLocaleString()}</td>
+      <td style="color:var(--text-muted)">${e.paidBy}</td>
+      <td>${e.status==='approved'?'<span class="badge badge-success">Approved</span>':'<span class="badge badge-warning">Pending</span>'}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="approveExpense(${i})">Approve</button>
+          <button class="btn btn-ghost btn-sm btn-danger" onclick="deleteExpense(${i})" style="background:var(--danger-dim);border-color:var(--danger);color:var(--danger)">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// --- INVOICES ---
+function renderInvoices() {
+  document.getElementById('invoices-tbody').innerHTML = DB.invoices.map(inv => `
+    <tr>
+      <td class="td-mono" style="color:var(--accent)">${inv.id}</td>
+      <td>${inv.customer}</td>
+      <td style="color:var(--text-muted)">${formatDate(inv.issued)}</td>
+      <td style="color:${inv.status==='overdue'?'var(--danger)':'var(--text-muted)'}">${formatDate(inv.due)}</td>
+      <td style="font-family:var(--mono);font-weight:700">$${inv.amount.toLocaleString()}</td>
+      <td>${invoiceBadge(inv.status)}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="printInvoice()">🖨 Print</button>
+          <button class="btn btn-ghost btn-sm" onclick="sendInvoice('${inv.id}')">📧 Send</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// --- REPORTS ---
+function renderReports() {
+  // Weekly revenue bars
+  const wDays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const wVals = [1200,1840,980,2100,2400,2100,860];
+  const wMax = Math.max(...wVals);
+  document.getElementById('weekly-revenue-chart').innerHTML = wDays.map((d,i) => `
+    <div class="chart-row">
+      <div class="chart-row-label">${d}</div>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(wVals[i]/wMax*100).toFixed(1)}%;background:var(--accent)"></div></div>
+      <div class="chart-row-val">$${(wVals[i]/1000).toFixed(1)}k</div>
+    </div>
+  `).join('');
+
+  // Top products weekly
+  document.getElementById('weekly-top-products').innerHTML = ['iPhone 15 Pro Max','MacBook Air M3','Peloton Bike+','Samsung Galaxy S24','Garmin Fenix 7'].map((p,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px">${i+1}. ${p}</span>
+      <span style="font-family:var(--mono);font-size:13px;font-weight:700">$${[3597,2598,2495,1998,1398][i].toLocaleString()}</span>
+    </div>
+  `).join('');
+
+  // Order status
+  const statuses = [{l:'Delivered',v:28,c:'var(--success)'},{l:'Shipped',v:15,c:'var(--info)'},{l:'Processing',v:18,c:'var(--warning)'},{l:'Cancelled',v:7,c:'var(--danger)'}];
+  const sMax = Math.max(...statuses.map(s=>s.v));
+  document.getElementById('weekly-order-status').innerHTML = statuses.map(s => `
+    <div class="chart-row" style="margin-bottom:10px">
+      <div style="width:90px;font-size:12px;color:var(--text-secondary)">${s.l}</div>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(s.v/sMax*100).toFixed(1)}%;background:${s.c}"></div></div>
+      <div class="chart-row-val">${s.v}</div>
+    </div>
+  `).join('');
+
+  // Monthly chart
+  const mVals = Array.from({length:30},(_,i)=>2000+Math.sin(i/3)*1000+Math.random()*500);
+  drawLineChart('monthly-chart', mVals, '#6366f1');
+
+  // Yearly bars
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const yVals = [38000,42000,35000,48000,52000,48290,0,0,0,0,0,0];
+  const yMax = 60000;
+  document.getElementById('yearly-revenue-chart').innerHTML = months.map((m,i) => `
+    <div class="chart-row">
+      <div class="chart-row-label">${m}</div>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${yVals[i]?(yVals[i]/yMax*100).toFixed(1):0}%;background:${yVals[i]?'var(--accent)':'var(--border)'}"></div></div>
+      <div class="chart-row-val">${yVals[i]?'$'+(yVals[i]/1000).toFixed(0)+'k':'–'}</div>
+    </div>
+  `).join('');
+
+  // YoY chart
+  const yoyThisYear = [38,42,35,48,52,48,0,0,0,0,0,0];
+  const yoyLastYear = [28,31,29,38,41,44,39,36,42,45,38,42];
+  drawLineChart('yoy-chart', yoyLastYear, '#8b8fa8', '#6366f1');
+}
+
+// ============================================================
+// HELPER RENDERERS
+// ============================================================
+function statusBadge(status) {
+  const map = {
+    completed:'<span class="badge badge-success"><span class="status-dot"></span>Completed</span>',
+    pending:'<span class="badge badge-warning"><span class="status-dot"></span>Pending</span>',
+    refunded:'<span class="badge badge-info"><span class="status-dot"></span>Refunded</span>',
+    delivered:'<span class="badge badge-success"><span class="status-dot"></span>Delivered</span>',
+    shipped:'<span class="badge badge-info"><span class="status-dot"></span>Shipped</span>',
+    processing:'<span class="badge badge-warning"><span class="status-dot"></span>Processing</span>',
+    cancelled:'<span class="badge badge-danger"><span class="status-dot"></span>Cancelled</span>',
+  };
+  return map[status] || `<span class="badge badge-muted">${status}</span>`;
+}
+
+function customerBadge(type) {
+  const map = {vip:'<span class="badge badge-warning">⭐ VIP</span>',regular:'<span class="badge badge-accent">Regular</span>',new:'<span class="badge badge-teal">New</span>'};
+  return map[type] || `<span class="badge badge-muted">${type}</span>`;
+}
+
+function invoiceBadge(status) {
+  const map = {paid:'<span class="badge badge-success">Paid</span>',pending:'<span class="badge badge-warning">Pending</span>',overdue:'<span class="badge badge-danger">Overdue</span>'};
+  return map[status] || `<span class="badge badge-muted">${status}</span>`;
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+const modalForms = {
+  sale: {
+    title: 'New Sale',
+    fields: `
+      <div class="form-grid">
+        <div class="form-group"><label>Customer</label><select id="f-customer"><option>Emma Thompson</option><option>James Wilson</option><option>Daniel Kim</option><option>Sofia Rodriguez</option><option>Isabella Martinez</option></select></div>
+        <div class="form-group"><label>Payment Method</label><select id="f-payment"><option>Credit Card</option><option>Debit Card</option><option>PayPal</option><option>Bank Transfer</option><option>Cash</option></select></div>
+        <div class="form-group full"><label>Product(s)</label><select id="f-product"><option value="">Select product...</option>${DB.products.map(p=>`<option value="${p.id}">${p.name} — $${p.price}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Quantity</label><input type="number" id="f-qty" value="1" min="1"></div>
+        <div class="form-group"><label>Discount (%)</label><input type="number" id="f-discount" value="0" min="0" max="100"></div>
+        <div class="form-group"><label>Status</label><select id="f-status"><option value="completed">Completed</option><option value="pending">Pending</option></select></div>
+        <div class="form-group full"><label>Notes</label><textarea id="f-notes" placeholder="Optional notes..."></textarea></div>
+      </div>`
+  },
+  product: {
+    title: 'Add Product',
+    fields: `
+      <div class="form-grid">
+        <div class="form-group"><label>SKU</label><input type="text" id="f-sku" placeholder="EL-001"></div>
+        <div class="form-group"><label>Category</label><select id="f-cat"><option>Electronics</option><option>Clothing</option><option>Home & Garden</option><option>Sports</option><option>Books</option></select></div>
+        <div class="form-group full"><label>Product Name</label><input type="text" id="f-name" placeholder="Enter product name..."></div>
+        <div class="form-group"><label>Selling Price ($)</label><input type="number" id="f-price" placeholder="0.00"></div>
+        <div class="form-group"><label>Cost Price ($)</label><input type="number" id="f-cost" placeholder="0.00"></div>
+        <div class="form-group"><label>Stock Quantity</label><input type="number" id="f-stock" placeholder="0"></div>
+        <div class="form-group"><label>Reorder Level</label><input type="number" id="f-reorder" placeholder="10"></div>
+        <div class="form-group"><label>Supplier</label><select id="f-supplier">${DB.suppliers.map(s=>`<option>${s.name}</option>`).join('')}</select></div>
+        <div class="form-group full"><label>Description</label><textarea id="f-desc" placeholder="Product description..."></textarea></div>
+      </div>`
+  },
+  customer: {
+    title: 'Add Customer',
+    fields: `
+      <div class="form-grid">
+        <div class="form-group"><label>First Name</label><input type="text" id="f-fname" placeholder="John"></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="f-lname" placeholder="Doe"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="f-email" placeholder="john@email.com"></div>
+        <div class="form-group"><label>Phone</label><input type="text" id="f-phone" placeholder="555-0100"></div>
+        <div class="form-group"><label>Customer Type</label><select id="f-type"><option value="new">New</option><option value="regular">Regular</option><option value="vip">VIP</option></select></div>
+        <div class="form-group"><label>Source</label><select><option>Website</option><option>Referral</option><option>Social Media</option><option>Walk-in</option></select></div>
+        <div class="form-group full"><label>Address</label><textarea id="f-address" placeholder="Shipping address..."></textarea></div>
+      </div>`
+  },
+  order: {
+    title: 'New Order',
+    fields: `
+      <div class="form-grid">
+        <div class="form-group"><label>Customer</label><select id="f-customer">${DB.customers.map(c=>`<option>${c.name}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Shipping Method</label><select id="f-shipping"><option>FedEx</option><option>UPS</option><option>USPS</option><option>DHL</option></select></div>
+        <div class="form-group full"><label>Product</label><select id="f-product">${DB.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Quantity</label><input type="number" id="f-qty" value="1" min="1"></div>
+        <div class="form-group"><label>Status</label><select id="f-status"><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option></select></div>
+        <div class="form-group full"><label>Shipping Address</label><textarea id="f-address"></textarea></div>
+      </div>`
+  },
+  supplier: {
+    title: 'Add Supplier',
+    fields: `
+      <div class="form-grid">
+        <div class="form-group full"><label>Company Name</label><input type="text" id="f-name" placeholder="Supplier Inc."></div>
+        <div class="form-group"><label>Contact Person</label><input type="text" id="f-contact" placeholder="John Smith"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="f-email" placeholder="contact@supplier.com"></div>
+        <div class="form-group"><label>Phone</label><input type="text" id="f-phone"></div>
+        <div class="form-group"><label>Category</label><select id="f-cat"><option>Electronics</option><option>Clothing</option><option>Home & Garden</option><option>Sports</option></select></div>
+        <div class="form-group"><label>Lead Time</label><input type="text" id="f-lead" placeholder="7 days"></div>
+        <div class="form-group full"><label>Address</label><textarea id="f-address"></textarea></div>
+      </div>`
+  },
+  expense: {
+    title: 'Add Expense',
+    fields: `
+      <div class="form-grid">
+        <div class="form-group full"><label>Description</label><input type="text" id="f-desc" placeholder="Expense description..."></div>
+        <div class="form-group"><label>Amount ($)</label><input type="number" id="f-amount" placeholder="0.00"></div>
+        <div class="form-group"><label>Category</label><select id="f-cat"><option>Operations</option><option>Marketing</option><option>Technology</option><option>HR</option><option>Logistics</option><option>Other</option></select></div>
+        <div class="form-group"><label>Date</label><input type="date" id="f-date"></div>
+        <div class="form-group"><label>Paid By</label><select id="f-paid"><option>Company Card</option><option>Bank Transfer</option><option>Cash</option><option>Check</option></select></div>
+        <div class="form-group"><label>Status</label><select id="f-status"><option value="pending">Pending</option><option value="approved">Approved</option></select></div>
+        <div class="form-group full"><label>Receipt / Notes</label><textarea id="f-notes"></textarea></div>
+      </div>`
+  },
+  invoice: {
+    title: 'New Invoice',
+    fields: `
+      <div class="form-grid">
+        <div class="form-group"><label>Customer</label><select id="f-customer">${DB.customers.map(c=>`<option>${c.name}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Due Date</label><input type="date" id="f-due"></div>
+        <div class="form-group full"><label>Product / Service</label><select id="f-product">${DB.products.map(p=>`<option value="${p.price}">${p.name} — $${p.price}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Quantity</label><input type="number" id="f-qty" value="1" min="1"></div>
+        <div class="form-group"><label>Tax (%)</label><input type="number" id="f-tax" value="8.5"></div>
+        <div class="form-group"><label>Discount (%)</label><input type="number" id="f-discount" value="0"></div>
+        <div class="form-group full"><label>Notes</label><textarea id="f-notes" placeholder="Payment terms, notes..."></textarea></div>
+      </div>`
+  }
+};
+
+let currentModalType = null;
+function openModal(type, data) {
+  currentModalType = type;
+  const def = modalForms[type] || {title:'Record',fields:'<p>No form defined.</p>'};
+  document.getElementById('modal-title').textContent = (editId ? 'Edit ' : '') + def.title;
+  document.getElementById('modal-body').innerHTML = def.fields;
+  document.getElementById('modal-overlay').classList.add('open');
+  if (data) populateForm(type, data);
+}
+
+function populateForm(type, data) {
+  if (type === 'product') {
+    const p = DB.products.find(x => x.id == data);
+    if (!p) return;
+    const f = id => document.getElementById(id);
+    if(f('f-sku')) f('f-sku').value = p.sku;
+    if(f('f-name')) f('f-name').value = p.name;
+    if(f('f-price')) f('f-price').value = p.price;
+    if(f('f-cost')) f('f-cost').value = p.cost;
+    if(f('f-stock')) f('f-stock').value = p.stock;
+    if(f('f-reorder')) f('f-reorder').value = p.reorder;
+  }
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  editId = null;
+  currentModalType = null;
+}
+
+function saveModal() {
+  const type = currentModalType;
+  if (type === 'product') {
+    const name = document.getElementById('f-name')?.value;
+    const price = parseFloat(document.getElementById('f-price')?.value) || 0;
+    const stock = parseInt(document.getElementById('f-stock')?.value) || 0;
+    if (!name) { showNotif('Error','Product name is required','❌'); return; }
+    if (editId) {
+      const p = DB.products.find(x => x.id == editId);
+      if (p) { p.name = name; p.price = price; p.stock = stock; }
+      showNotif('Updated','Product updated successfully','✅');
+    } else {
+      DB.products.push({id:Date.now(),sku:document.getElementById('f-sku')?.value||'PR-NEW',name,category:document.getElementById('f-cat')?.value||'Other',price,cost:parseFloat(document.getElementById('f-cost')?.value)||0,stock,reorder:parseInt(document.getElementById('f-reorder')?.value)||10,supplier:''});
+      showNotif('Added','Product added successfully','✅');
+    }
+  } else if (type === 'customer') {
+    const fname = document.getElementById('f-fname')?.value;
+    const lname = document.getElementById('f-lname')?.value;
+    if (!fname) { showNotif('Error','First name is required','❌'); return; }
+    DB.customers.push({id:Date.now(),name:`${fname} ${lname}`,email:document.getElementById('f-email')?.value||'',phone:document.getElementById('f-phone')?.value||'',orders:0,spent:0,since:new Date().toISOString().split('T')[0],type:document.getElementById('f-type')?.value||'new'});
+    showNotif('Added','Customer added successfully','✅');
+  } else if (type === 'sale') {
+    const saleId = `SL-${2420 + DB.sales.length}`;
+    DB.sales.unshift({id:saleId,customer:document.getElementById('f-customer')?.value||'Customer',items:'New item × 1',amount:299,date:new Date().toISOString().split('T')[0],payment:document.getElementById('f-payment')?.value||'Credit Card',status:document.getElementById('f-status')?.value||'pending'});
+    document.getElementById('new-sales-badge').textContent = parseInt(document.getElementById('new-sales-badge').textContent||0) + 1;
+    showNotif('Sale Recorded',`${saleId} created successfully`,'✅');
+  } else if (type === 'expense') {
+    const desc = document.getElementById('f-desc')?.value;
+    if (!desc) { showNotif('Error','Description required','❌'); return; }
+    DB.expenses.unshift({date:document.getElementById('f-date')?.value||new Date().toISOString().split('T')[0],desc,cat:document.getElementById('f-cat')?.value||'Other',amount:parseFloat(document.getElementById('f-amount')?.value)||0,paidBy:document.getElementById('f-paid')?.value||'Company Card',status:document.getElementById('f-status')?.value||'pending'});
+    showNotif('Added','Expense recorded','✅');
+  } else {
+    showNotif('Saved','Record saved successfully','✅');
+  }
+  document.getElementById('modal-overlay').classList.remove('open');
+  editId = null;
+  currentModalType = null;
+  setTimeout(() => renderPage(currentPage), 100);
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+function editRecord(type, id) {
+  editId = id;
+  openModal(type, id);
+}
+
+function viewSale(id) {
+  const sale = DB.sales.find(s => s.id === id);
+  if (!sale) return;
+  document.getElementById('modal-title').textContent = `Sale ${id}`;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div><div style="font-size:11px;color:var(--text-muted)">Customer</div><div style="font-weight:600;margin-top:4px">${sale.customer}</div></div>
+      <div><div style="font-size:11px;color:var(--text-muted)">Date</div><div style="font-weight:600;margin-top:4px">${formatDate(sale.date)}</div></div>
+      <div><div style="font-size:11px;color:var(--text-muted)">Items</div><div style="font-weight:600;margin-top:4px">${sale.items}</div></div>
+      <div><div style="font-size:11px;color:var(--text-muted)">Payment</div><div style="font-weight:600;margin-top:4px">${sale.payment}</div></div>
+      <div><div style="font-size:11px;color:var(--text-muted)">Status</div><div style="margin-top:4px">${statusBadge(sale.status)}</div></div>
+      <div><div style="font-size:11px;color:var(--text-muted)">Total</div><div style="font-size:20px;font-weight:700;color:var(--accent);margin-top:4px;font-family:var(--mono)">$${sale.amount.toLocaleString()}</div></div>
+    </div>`;
+  document.getElementById('modal-save-btn').style.display = 'none';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function viewCustomer(id) {
+  const c = DB.customers.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('modal-title').textContent = c.name;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      <div class="avatar" style="width:48px;height:48px;font-size:16px">${c.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+      <div><div style="font-size:16px;font-weight:700">${c.name}</div><div style="margin-top:4px">${customerBadge(c.type)}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div><div style="font-size:11px;color:var(--text-muted)">Email</div><div style="color:var(--info);margin-top:4px">${c.email}</div></div>
+      <div><div style="font-size:11px;color:var(--text-muted)">Phone</div><div style="margin-top:4px">${c.phone}</div></div>
+      <div><div style="font-size:11px;color:var(--text-muted)">Total Orders</div><div style="font-size:20px;font-weight:700;margin-top:4px">${c.orders}</div></div>
+      <div><div style="font-size:11px;color:var(--text-muted)">Total Spent</div><div style="font-size:20px;font-weight:700;color:var(--accent);margin-top:4px;font-family:var(--mono)">$${c.spent.toLocaleString()}</div></div>
+      <div><div style="font-size:11px;color:var(--text-muted)">Customer Since</div><div style="margin-top:4px">${formatDate(c.since)}</div></div>
+      <div><div style="font-size:11px;color:var(--text-muted)">Avg. Order Value</div><div style="margin-top:4px;font-family:var(--mono)">$${Math.round(c.spent/c.orders||0)}</div></div>
+    </div>`;
+  document.getElementById('modal-save-btn').textContent = '📧 Send Email';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function reorderProduct(id) {
+  const p = DB.products.find(x => x.id === id);
+  showNotif('Reorder Sent',`Purchase order created for ${p.name}`,'📦');
+}
+
+function updateOrderStatus(id) {
+  const o = DB.orders.find(x => x.id === id);
+  if (!o) return;
+  const flow = {processing:'shipped',shipped:'delivered',delivered:'delivered',cancelled:'cancelled'};
+  o.status = flow[o.status] || o.status;
+  showNotif('Status Updated',`${id} → ${o.status}`,'✅');
+  renderOrders();
+}
+
+function viewOrderTimeline(id) {
+  const o = DB.orders.find(x => x.id === id);
+  document.getElementById('modal-title').textContent = `Tracking — ${id}`;
+  const steps = [{icon:'📦',title:'Order Placed',meta:'Jun 14, 2024 — 9:32 AM'},{icon:'✅',title:'Order Confirmed',meta:'Jun 14, 2024 — 10:15 AM'},{icon:'🏭',title:'Processing at Warehouse',meta:'Jun 14, 2024 — 2:00 PM'},{icon:'🚚',title:'Shipped via FedEx',meta:'Jun 15, 2024 — 8:00 AM'},{icon:'📫',title:'Out for Delivery',meta:'Jun 15, 2024 — 11:30 AM'}];
+  document.getElementById('modal-body').innerHTML = `
+    <div class="timeline">
+      ${steps.map(s=>`<div class="timeline-item"><div class="timeline-dot">${s.icon}</div><div class="timeline-body"><div class="timeline-title">${s.title}</div><div class="timeline-meta">${s.meta}</div></div></div>`).join('')}
+    </div>`;
+  document.getElementById('modal-save-btn').style.display='none';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function approveExpense(i) {
+  DB.expenses[i].status = 'approved';
+  showNotif('Approved','Expense approved','✅');
+  renderExpenses();
+}
+
+function deleteExpense(i) {
+  DB.expenses.splice(i,1);
+  showNotif('Deleted','Expense removed','🗑');
+  renderExpenses();
+}
+
+function contactSupplier(id) {
+  const s = DB.suppliers.find(x=>x.id===id);
+  showNotif('Email Drafted',`Opening email to ${s.contact} at ${s.name}`,'📧');
+}
+
+function sendInvoice(id) { showNotif('Invoice Sent',`${id} sent to customer via email`,'📧'); }
+function printInvoice() { window.print(); }
+function exportData(type) { showNotif('Export Ready',`${type.charAt(0).toUpperCase()+type.slice(1)} data exported to CSV`,'⬇'); }
+
+// ============================================================
+// FILTERS
+// ============================================================
+function filterTable(type, val) {
+  filters[type].text = val.toLowerCase();
+  renderPage(currentPage);
+}
+function filterByStatus(type, val) {
+  filters[type] = filters[type] || {};
+  filters[type].status = val;
+  renderPage(currentPage);
+}
+function filterByDate(type, val) {
+  filters[type].date = val;
+  renderPage(currentPage);
+}
+function filterByCategory(type, val) {
+  filters[type].cat = val;
+  renderPage(currentPage);
+}
+function filterByStock(val) {
+  filters.inventory.stock = val;
+  renderPage(currentPage);
+}
+
+function globalSearch(val) {
+  if (!val) return;
+  const q = val.toLowerCase();
+  const inProducts = DB.products.some(p=>p.name.toLowerCase().includes(q));
+  const inCustomers = DB.customers.some(c=>c.name.toLowerCase().includes(q));
+  if (inCustomers) { navigate('customers'); filters.customers.text = q; renderCustomers(); }
+  else if (inProducts) { navigate('inventory'); filters.inventory.text = q; renderInventory(); }
+}
+
+// ============================================================
+// SORTING
+// ============================================================
+let sortState = {};
+function sortTable(type, field) {
+  const key = type+'_'+field;
+  sortState[key] = !sortState[key];
+  const asc = sortState[key];
+  if (type === 'sales') DB.sales.sort((a,b) => asc ? (a[field]>b[field]?1:-1) : (a[field]<b[field]?1:-1));
+  if (type === 'inventory') DB.products.sort((a,b) => asc ? (a[field]>b[field]?1:-1) : (a[field]<b[field]?1:-1));
+  if (type === 'customers') DB.customers.sort((a,b) => asc ? (a[field]>b[field]?1:-1) : (a[field]<b[field]?1:-1));
+  renderPage(currentPage);
+}
+
+// ============================================================
+// DASHBOARD PERIOD
+// ============================================================
+function updateDashboardPeriod(period) {
+  const data = {
+    today:  {revenue:'$6,240',orders:'42',customers:'6',lowstock:'7'},
+    week:   {revenue:'$48,290',orders:'284',customers:'38',lowstock:'7'},
+    month:  {revenue:'$48,290',orders:'284',customers:'38',lowstock:'7'},
+    year:   {revenue:'$524,800',orders:'3,180',customers:'412',lowstock:'7'},
+  };
+  const d = data[period];
+  document.getElementById('dash-revenue').textContent = d.revenue;
+  document.getElementById('dash-orders').textContent = d.orders;
+  document.getElementById('dash-customers').textContent = d.customers;
+  document.getElementById('dash-lowstock').textContent = d.lowstock;
+}
+
+// ============================================================
+// REPORT TABS
+// ============================================================
+function switchReportTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['weekly','monthly','yearly'].forEach(t => document.getElementById('report-'+t).style.display = t===tab?'block':'none');
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+function showNotif(title, msg, icon='ℹ️') {
+  const stack = document.getElementById('notif-stack');
+  const el = document.createElement('div');
+  el.className = 'notif';
+  el.innerHTML = `<div class="notif-icon">${icon}</div><div><div class="notif-msg">${title}</div><div class="notif-sub">${msg}</div></div>`;
+  stack.appendChild(el);
+  setTimeout(() => el.style.opacity = '0', 3000);
+  setTimeout(() => el.remove(), 3300);
+}
+
+// ============================================================
+// SIDEBAR MOBILE
+// ============================================================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  renderDashboard();
+  // Pre-set today's date in date inputs
+  const today = new Date().toISOString().split('T')[0];
+  document.querySelectorAll('input[type="date"]').forEach(el => el.value = today);
+  // Show welcome notif
+  setTimeout(() => showNotif('Welcome back, Alex!','Dashboard loaded — all systems operational','⚡'), 600);
+});
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { document.getElementById('modal-overlay').classList.remove('open'); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('global-search').focus();
+  }
+});
+</script>
+</body>
+</html>
